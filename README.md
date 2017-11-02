@@ -36,10 +36,15 @@ through compiler flags:
 |---|---|---|---|
 | 1 |  | No optimizations, normal pointer based tree structure |
 | 2 | PPACK | Like 1 but with child pointers and child offsets co-located in memory | fewer memory probes / operation 
-| 3 | PFREE | Use a heap-like tree representation (array instead of pointers) | fewer memory propes / operation, however memory overhead  is linear in maximum capacity |
+| 3 | PFREE | Use a heap-like tree representation (array instead of pointers) | fewer memory propes / operation, however memory overhead  is linear in # of elements* |
 | 4 | PFREE, COMPACT | Like 3 but with word-level packing of vertex offsets  | less space for tree structure => better cache utilization |
-| 5 | ARRAY LEVEL | Like 3 but with lazy allocation of leaves | memory overhead stays linear in # of elements |
+| 5 | ARRAY LEVEL | Like 3 but with lazy allocation of leaves | memory overhead sublinear in # of elements* |
 | 6 | ARRAY LEVEL PACK | Like 5 but pack the element pointer and the offset of a leaf in a single word | one less memory probe / operation |
+
+*We note that the complexity analysis is only true given the assumption that
+the structure is always at most a constant fraction from being full.
+In this implementation, the container's maximum size must be specified
+at compile time, and it does not support growing dynammically.
 
 Severel experiments have been carried out to compare the optimizations.
 They all provide some sort of trade-off between space usage,
@@ -47,23 +52,16 @@ memory probes / operation and instructions / opertaion.
 
 When working with sequences of ~10^8 elements, 
 the structure given by row 3 outperforms the others.
-However, this structure uses extra space linear in the maximum capacity 
-and not the number of elements in thte structure.
+However, this structure uses extra space linear in the number of elements.
 The structure given by row 6 is insignificantly slower
-but only uses space linear in the number of elements.
-Thus, this is the structure we would recommend.
+but only uses extra space sublinear in the number of elements.
+Thus, this is the structure we recommend.
 See the [publication](https://arxiv.org/abs/1711.00275) for more details and comparisons.
 
 # Use
 
 The tiered vector stores a sequence of elements that are ordered in
 a strict linear sequence and accessed by their position in this sequence.
-
-In this implementation, the container's maximum size must be specified
-at compile time, and it does not support growing dynammically.
-However, due to the nature of the data structure, the actual space
-usage grows with the number elements currently stored in the structure,
-and not the maximum capacity.
 
 The height of the tree underlying the data structure and the width of the leaves
 has an effect on the performance of the data structure.
@@ -85,8 +83,8 @@ where `x, y` and `z` are powers of two chosen such that the maximum capacity sui
 
 The interface tiered vector resembles that of `STL vector`.
 
-| | | 
-| --- | --- | --- |
+| |
+| --- | --- |
 | size | Return the number of elements in the tiered vector |
 | insert(i, x) | Insert element x after the element at position i |
 | remove(i) | Remove the element at position i |
