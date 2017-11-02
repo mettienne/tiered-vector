@@ -83,7 +83,7 @@ where `x, y` and `z` are powers of two chosen such that the maximum capacity sui
 
 The interface tiered vector resembles that of `STL vector`.
 
-| |
+| | |
 | --- | --- |
 | size | Return the number of elements in the tiered vector |
 | insert(i, x) | Insert element x after the element at position i |
