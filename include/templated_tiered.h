@@ -203,6 +203,7 @@ namespace Seq
         };
 
 };
+
 #endif
 
 #define TT template <class T, class Layer>
@@ -442,7 +443,7 @@ namespace Seq
                 else {
                     cout << n << " -> " << x << ';' << endl;
 
-                    x = helper<T, typename Layer::child>::print_helper((size_t)&elem, x);
+                    x = helper<T, typename Layer::child>::print_helper((size_t)&elem, x, Info{});
                 }
             }
 
@@ -589,7 +590,7 @@ namespace Seq
         }
 
 #endif
-
+        //elem is the element to insert, addr is root, from is the idx to insert, count is ??
         static T pop_push(T elem, size_t addr, size_t from, size_t count, bool goRight, Info info) {
 
             T res;
@@ -851,7 +852,7 @@ namespace Seq
     TT
         void Tiered<T, Layer>::print(){
             cout << "digraph G {" << endl;
-            helper<T, Layer>::print_helper(root, 0);
+            helper<T, Layer>::print_helper(root, 0, Info{});
             cout << "}" << endl;
         }
 
@@ -859,6 +860,11 @@ namespace Seq
         void Tiered<T, Layer>::randomize() {
             helper<T, Layer>::randomize(root, size, info);
         }
+
+    template<class T, class Layer>
+    int Tiered<T, Layer>::print_helper(FakeNode<void *> *node, int n) {
+        return helper<T, typename Layer::child>::print_helper((size_t)node, n, 1);
+    }
 
 
 }
