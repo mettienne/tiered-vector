@@ -41,11 +41,16 @@ int main(int argc, char * argv[])
         cout<<tiered.operator[](j)<<" ";
     }
     cout<<endl;
+    tiered.drawTree();
+
     tiered.insert(3, 30);
-    for (int j = 0; j < MAX; ++j) {
+    tiered.drawTree();
+    for (int j = 0; j < MAX+1; ++j) {
         cout<<tiered.operator[](j)<<" ";
     }
     cout<<endl;
+    tiered.drawString();
+
     //tiered.print();
 
     // Stop time
