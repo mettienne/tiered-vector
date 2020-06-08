@@ -374,7 +374,7 @@ namespace Seq
                 return;
             }
             int offset = (idx + get_offset(cur, Info{})) % Layer::capacity;
-            printf("[%d, %d, %d]", offset, node->size, node->id);
+            printf("[%d, %zu, %zu]", offset, node->size, node->id);
             for (int i = 0; i < Layer::width; ++i) {
                 printf(" _");
             }
@@ -393,24 +393,21 @@ namespace Seq
                 helper<T, typename Layer::child>::drawTree(idx, lst, rank, exp);
             }
         }
-        static int* drawString(size_t addr, size_t idx, Info info, size_t size) {
+        static int* drawString(size_t addr, size_t idx, Info info, size_t ExpectedSize, size_t& RealSize) {
             idx = (idx + get_offset(addr, info)) % Layer::capacity;
-            int * ans = new int[size];
-            int curSize = 0;
-            for (int j = 0; j < Layer::width; ++j) {
-                auto child = get_child(addr, idx/ Layer::child::capacity);
-                int * re = helper<T, typename Layer::child>::drawString(child, idx, info, Layer::child::capacity);
-                for (int i = 0; i < Layer::child::capacity; ++i) {
-                    cout<<re[i]<<" ";
-                }
-                cout<<endl;
-                copy(re, re+Layer::child::capacity, ans+j*Layer::child::capacity);
+            int * ans = new int[ExpectedSize];
+            INODE* cur = (INODE*) addr;
+            RealSize = 0;
+            size_t thisSize = 0;
+            int ansIdx = 0;
+            for (int j = 0; j < cur->size; ++j) {
+                auto child = get_child(addr, idx / Layer::child::capacity);
+                int * re = helper<T, typename Layer::child>::drawString(child, idx, info, Layer::child::capacity, thisSize);
+                copy(re, re+int(thisSize), ans+ansIdx);
+                ansIdx += thisSize;
+                RealSize += thisSize;
                 delete []re;
-                idx = (idx+Layer::child::capacity) ;
-                curSize += Layer::child::capacity;
-                if (curSize >= size) {
-                    break;
-                }
+                idx = (idx+thisSize) % Layer::capacity;
             }
             return ans;
         }
@@ -482,9 +479,9 @@ namespace Seq
             T& t = get(addr, idx, info);
             T res = t;
             t = elem;
-         //   LNODE *leaf;
-          //  leaf = (LNODE *) get_child(addr, idx);
-           // leaf->size++;
+            LNODE *leaf;
+            leaf = (LNODE *) get_leaf(addr, idx, info);
+            leaf->size++;
             return res;
         }
 
@@ -722,15 +719,16 @@ namespace Seq
             idx = (idx + helper<T, L>::get_offset(addr, info)) % L::capacity;
             return get_elem(addr, idx, info);
         }
-        static int* drawString(size_t addr, size_t idx, Info info, size_t size) {
-            int * ans = new int[size];
+        static int* drawString(size_t addr, size_t idx, Info info, size_t expectedSize, size_t& realSize) {
             idx = (idx + helper<T, L>::get_offset(addr, info)) % L::capacity;
             LNODE * node = (LNODE*)addr;
+            int * ans = new int[node->size];
             for (int j = 0; j < node->size; ++j) {
                 size_t cur = node->elems[idx];
                 ans[j] = cur;
                 idx = (idx+1) % L::capacity;
             }
+            realSize = node->size;
             return ans;
         }
         static void drawTree(size_t idx, list<size_t>&lst, int & rank, int & exp) {
@@ -742,7 +740,7 @@ namespace Seq
                 return;
             }
             int offset = (idx + get_offset(cur, Info{})) % L::capacity;
-            printf("[%d, %d, %d]", offset, node->size, node->id);
+            printf("[%d, %zu, %zu]", offset, node->size, node->id);
             for (int i = 0; i < L::width; ++i) {
                 printf(" %d", ((LNODE *)cur)->elems[i]);
             }
@@ -799,6 +797,9 @@ namespace Seq
             T& t = get(addr, idx, info);
             T res = t;
             t = elem;
+            LNODE *leaf;
+            leaf = (LNODE *) get_leaf(addr, idx, info);
+            leaf->size++;
             return res;
         }
 
@@ -965,15 +966,17 @@ namespace Seq
     }
     TT
     void Tiered<T, Layer>::drawString(){
-        //assert (idx < size);
-        int * s = helper<T, Layer>::drawString((size_t)root, 0, info, size);
-        for (int i = 0; i < size; ++i) {
+        cout<<"tiered.drawString(): ";
+        size_t realSize = 0;
+        int * s = helper<T, Layer>::drawString((size_t)root, 0, info, size, realSize);
+        for (int i = 0; i < realSize; ++i) {
             cout<<s[i]<<" ";
         }
         cout<<endl;
     }
     TT
     void Tiered<T, Layer>::drawTree(){
+        cout<<"tiered.drawTree():"<<endl;
         list<size_t> lst;
         lst.push_back((size_t)root);
         int rank = 0, exp = 0;

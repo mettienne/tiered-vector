@@ -15,7 +15,7 @@
 #include <ctime>
 #include <vector>
 
-#define MAX (5)
+#define MAX (9)
 
 
 using namespace std;
@@ -34,22 +34,16 @@ int main(int argc, char * argv[])
 
     // Do random insertions
     for (int i = 0; i < MAX; i++) {
-        size_t idx = rand() % (i + 1);
+       // size_t idx = rand() % (i + 1);
+        size_t idx = i;
         tiered.insert(idx, i + 1);
     }
-    for (int j = 0; j < MAX; ++j) {
-        cout<<tiered.operator[](j)<<" ";
-    }
-    cout<<endl;
+
     tiered.drawTree();
 
-    tiered.insert(3, 30);
-    tiered.drawTree();
-    for (int j = 0; j < MAX+1; ++j) {
-        cout<<tiered.operator[](j)<<" ";
-    }
-    cout<<endl;
     tiered.drawString();
+
+    tiered.insert(4, 40);
 
     //tiered.print();
 
