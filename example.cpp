@@ -43,7 +43,7 @@ int main(int argc, char * argv[])
 
     tiered.drawString();
 
-    tiered.insert(4, 40);
+   // tiered.insert(4, 40);
 
     //tiered.print();
 

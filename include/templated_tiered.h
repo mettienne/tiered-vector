@@ -152,7 +152,8 @@ namespace Seq
 #else
                 size_t offset = 0;
 #endif
-                T elems[width];
+                //T elems[width];
+                vector<T> elems;
         };
 
     template <class T>
@@ -165,7 +166,7 @@ namespace Seq
 #else
                 size_t offset = 0;
 #endif
-                T elems[];
+                vector<T> elems; //T elems[];
         };
 
     template <class T, class Layer>
@@ -212,6 +213,12 @@ namespace Seq
                 void randomize();
 
         void drawTree();
+
+        void expand();
+
+        void expand(size_t root, size_t idx);
+
+        void expand(size_t addr, size_t idx, int *allEle, size_t startIdx);
     };
 
 };
@@ -411,7 +418,12 @@ namespace Seq
             }
             return ans;
         }
+        static void expand(size_t addr, size_t idx, int * allEle, size_t startIdx) {
+            INODE* node = (INODE*) addr;
+            node->elems.resize(Layer::width * 2);
+           // Layer::width *= 2;
 
+        }
 
         static bool remove_room(size_t addr, size_t idx) {
 #ifdef PPACK
@@ -859,7 +871,8 @@ namespace Seq
 
     template<class T, size_t width>
         Node<T, width>::Node(size_t depth) : depth(depth) {
-            memset(elems, 0, sizeof(T)*width);
+            elems.resize(width);
+            //memset(elems, 0, sizeof(T)*width);
             id = ID;
             ID++;
         }
@@ -868,11 +881,20 @@ namespace Seq
         T Tiered<T, Layer>::sum(size_t from, size_t count){
             return helper<T, Layer>::sum((size_t)root, from, count, info);
         }
-
+    TT
+        void Tiered<T, Layer>::expand(size_t addr, size_t idx, int * allEle, size_t startIdx) {
+            cout<<"tiered.expand():"<<endl;
+            helper<T, Layer>::expand(addr, idx, allEle, startIdx);
+            cout<<endl;
+        }
     TT
         void Tiered<T, Layer>::insert(size_t idx, T elem){
 
-            assert((size < Layer::capacity));
+            if (size == Layer::capacity) {
+                size_t realSize = 0;
+                int * allEle = helper<T, Layer>::drawString(root, 0, Info{}, size, realSize);
+                expand((size_t)root, idx, allEle, 0);
+            }
             assert (idx <= size);
             if (idx >= size/2) {
                 elem = helper<T, Layer>::pop_push(elem, (size_t)root, idx, size - idx, true, info);
