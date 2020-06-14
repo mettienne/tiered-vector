@@ -29,6 +29,8 @@ int main(int argc, char * argv[])
     srand(0);
     //Seq::Tiered<int, LayerItr<LayerEnd, Layer<64, Layer<64, Layer<64>>>>> tiered;
     Seq::Tiered<int, LayerItr<LayerEnd, Layer<3, Layer<3>>>> tiered;
+    tiered.setTotalHeight();
+    cout<<totalHeight<<endl;
     // Start time
     clock_t begin = clock();
 
@@ -39,11 +41,9 @@ int main(int argc, char * argv[])
         tiered.insert(idx, i + 1);
     }
 
-    tiered.drawTree();
-
     tiered.drawString();
-
-   // tiered.insert(4, 40);
+    tiered.drawTree();
+    tiered.insert(4, 40);
 
     //tiered.print();
 
