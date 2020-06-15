@@ -33,13 +33,18 @@ int main(int argc, char * argv[])
     cout<<totalHeight<<endl;
     // Start time
     clock_t begin = clock();
-
+/*
     // Do random insertions
     for (int i = 0; i < MAX; i++) {
        // size_t idx = rand() % (i + 1);
         size_t idx = i;
         tiered.insert(idx, i + 1);
     }
+    */
+    tiered.insert(0, 1);
+    tiered.insert(1, 2);
+    tiered.insert(0,3);
+    tiered.drawTree();
 
     tiered.drawString();
     tiered.drawTree();

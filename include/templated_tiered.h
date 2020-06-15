@@ -535,6 +535,11 @@ namespace Seq
             leaf->size++;
             return res;
         }
+        static void insertIntoVector(T elem, size_t addr, size_t idx, Info info) {
+            idx = (idx + get_offset(addr, info)) % Layer::capacity;
+            auto child = get_child(addr, idx / Layer::child::capacity);
+            helper<T, typename Layer::child>::insertIntoVector(elem, child, idx, info);
+        }
 
         static int print_helper(size_t addr, int n, Info info) {
             int x = n + 1;
@@ -776,6 +781,12 @@ namespace Seq
             t = get_elem(addr, idx, info);
             return node->elems;
         }
+        static void insertIntoVector(T elem, size_t addr, size_t idx, Info info) {
+            idx = (idx + helper<T, L>::get_offset(addr, info)) % L::capacity;
+            LNODE * node = (LNODE*)addr;
+            node->elems.insert(node->elems.begin()+idx, elem);
+
+        }
         static int* drawString(size_t addr, size_t idx, Info info, size_t expectedSize, size_t& realSize) {
             idx = (idx + helper<T, L>::get_offset(addr, info)) % L::capacity;
             LNODE * node = (LNODE*)addr;
@@ -981,12 +992,12 @@ namespace Seq
             if (idx >= size/2) {
                 elem = helper<T, Layer>::pop_push(elem, (size_t)root, idx, size - idx, true, info);
                 helper<T, Layer>::make_room(root, size, info);
-                helper<T, Layer>::replace(elem, (size_t)root, size, info);
+                helper<T, Layer>::insertIntoVector(elem, (size_t)root, size, info);
             } else {
                 elem = helper<T, Layer>::pop_push(elem, (size_t)root, WRAP(idx - 1, Layer::capacity), idx, false, info);
                 helper<T, Layer>::set_offset(root, WRAP((helper<T, Layer>::get_offset(root, info) - 1), Layer::capacity), info);
                 helper<T, Layer>::make_room(root, 0, info);
-                helper<T, Layer>::replace(elem, (size_t)root, 0, info);
+                helper<T, Layer>::insertIntoVector(elem, (size_t)root, 0, info);
             }
 
             size++;

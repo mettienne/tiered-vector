@@ -5,6 +5,11 @@ using namespace std;
 int main() {
     vector<int> ve;
     ve.reserve(5);
+    printf("size of ve = %lu, capacity = %lu\n", ve.size(), ve.capacity());
+    ve.insert(ve.begin(), 100);
+    for (int j = 0; j < 5; ++j) {
+        printf("%d ", ve[j]);
+    }
     ve[0] = 0;
     ve[1] = 1;
     for (int j = 0; j < 5; ++j) {
